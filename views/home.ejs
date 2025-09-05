@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes Maker</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        .class1 {
+            display: flex;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            /* removed position:absolute and fixed height */
+        }
+
+        .sub-class1 {
+            width: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 14px;
+        }
+
+        .entry {
+            border: 1px solid black;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-radius: 14px;
+        }
+
+        .table1 {
+            margin-top: 50px;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 90%;
+            padding: 5px;
+            margin: 5px 0;
+        }
+
+        button {
+            cursor: pointer;
+            width: 80px;
+        }
+
+        /* Modal background */
+        .modal {
+            display: none;
+            /* hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal content */
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: left;
+        }
+
+        .close {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="class1">
+        <div class="sub-class1">
+            <h1>Notes-Maker</h1>
+            <h3>Makes your own notes</h3>
+        </div>
+        <div class="sub-class1">
+            <div class="entry">
+
+                <form method="POST" action="/notes/add">
+                    <label>Notes Title</label>
+                    <input type="text" name="title" required><br>
+
+                    <label>Creator Name</label>
+                    <input type="text" name="createdBy" required><br>
+
+                    <label>Description</label>
+                    <textarea name="description" required></textarea><br>
+
+                    <button type="submit">Save Note</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="table1">
+        <% if (locals.allNotes && allNotes.length> 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Created By</th>
+                        <th>Description</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% allNotes.forEach(note=> { %>
+                        <tr>
+                            <td>
+                                <%= note.title %>
+                            </td>
+                            <td>
+                                <%= note.createdBy %>
+                            </td>
+                            <td style="overflow: scroll;scrollbar-width: none; ">
+                                <%= note.description %>
+                            </td>
+                            <td>
+                                <form action="/notes/delete/<%= note.title %>" method="POST" style="display:inline;">
+                                    <button type="submit">Delete</button>
+                                </form>
+
+                                <button
+                                    onclick="openUpdateModal('<%= note._id %>', '<%= note.title %>', '<%= note.description %>', '<%= note.createdBy %>')">
+                                    Update
+                                </button>
+                                <div id="updateModal" class="modal">
+                                    <div class="modal-content">
+                                        <span class="close" onclick="closeModal()">&times;</span>
+                                        <h3>Update Note</h3>
+                                        <form id="updateForm" method="POST" >
+                                            <input type="hidden" name="id" id="noteId">
+
+                                            <label>Title:</label>
+                                            <input type="text" name="title" id="noteTitle" required><br><br>
+
+                                            <label>Description:</label>
+                                            <textarea name="description" id="noteDesc" required></textarea><br><br>
+
+                                            <label>Created By:</label>
+                                            <input type="text" name="createdBy" id="noteCreatedBy" required><br><br>
+
+                                            <button type="submit">Save Changes</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+            <% } %>
+    </div>
+    <!-- Update Modal -->
+
+
+    <script>
+        // Open modal with pre-filled values
+        function openUpdateModal(id, title, desc, createdBy) {
+            document.getElementById('updateModal').style.display = 'block';
+            document.getElementById('noteId').value = id;
+            document.getElementById('noteTitle').value = title;
+            document.getElementById('noteDesc').value = desc;
+            document.getElementById('noteCreatedBy').value = createdBy;
+            document.getElementById('updateForm').action = "/notes/update/" + id;
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('updateModal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
